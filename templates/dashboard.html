@@ -5,9 +5,9 @@
     <img src="{{ current_user.profile_pic or 'https://via.placeholder.com/100' }}" class="profile-pic mb-3" alt="Profile Pic">
     <div class="fw-bold mt-2" style="font-size:1.3rem;">{{ current_user.display_name }}</div>
     <div class="text-muted mb-4">{{ current_user.email }}</div>
-    <a href="{{ url_for('my_listings') }}" class="btn btn-outline-primary mb-2 w-75">My Listings</a>
-    <a href="{{ url_for('my_purchases') }}" class="btn btn-outline-primary mb-2 w-75">My Purchases</a>
-    <a href="{{ url_for('cart') }}" class="btn btn-outline-primary mb-2 w-75">Cart</a>
+    <a href="{{ url_for('my_listings') }}" class="btn btn-main mb-2 w-75">My Listings</a>
+    <a href="{{ url_for('my_purchases') }}" class="btn btn-main mb-2 w-75">My Purchases</a>
+    <a href="{{ url_for('cart') }}" class="btn btn-main mb-2 w-75">Cart</a>
   </div>
   <div class="col-md-8">
     <div class="glass-card p-4">

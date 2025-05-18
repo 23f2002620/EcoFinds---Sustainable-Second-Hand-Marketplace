@@ -29,7 +29,11 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
     
+    
 class Purchase(db.Model):
+    __tablename__ = 'purchase'  # Add this line
+    __table_args__ = {'extend_existing': True}  # Allow table updates
+    
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
@@ -64,14 +68,6 @@ class CartItem(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
     quantity = db.Column(db.Integer, default=1)
-    product = db.relationship('Product')
-
-
-class Purchase(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
-    user = db.relationship('User', backref='purchases')
     product = db.relationship('Product')
 
 # --- Login manager ---
@@ -195,7 +191,7 @@ def add_product():
     return render_template('add_product.html', categories=categories)
 
 # Add to cart
-@app.route('/add_to_cart/<int:product_id>')
+@app.route('/add_to_cart/<int:product_id>', methods=['POST'])
 @login_required
 def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
@@ -219,7 +215,7 @@ def add_to_cart(product_id):
     return redirect(url_for('cart'))
 
 # Remove from cart
-@app.route('/remove_from_cart/<int:product_id>')
+@app.route('/remove_from_cart/<int:product_id>', methods=['POST'])
 @login_required
 def remove_from_cart(product_id):
     cart_item = CartItem.query.filter_by(

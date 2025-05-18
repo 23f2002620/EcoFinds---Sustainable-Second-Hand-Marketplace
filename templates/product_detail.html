@@ -17,7 +17,7 @@
       <div class="mb-2"><b>Brand:</b> {{ product.brand }}</div>
       <div class="mb-2"><b>Model:</b> {{ product.model }}</div>
       <div class="mb-2"><b>Seller:</b> {{ product.seller.display_name }}</div>
-      <form method="post" action="{{ url_for('add_to_cart', pid=product.id) }}">
+      <form method="post" action="{{ url_for('add_to_cart', product_id=product.id) }}">
         <button type="submit" class="btn btn-main mt-3">Add to Cart</button>
       </form>
     </div>

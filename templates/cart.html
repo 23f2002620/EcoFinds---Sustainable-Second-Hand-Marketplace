@@ -26,7 +26,7 @@
           <td>{{ item.quantity }}</td>
           <td>${{ '%.2f' % (item.product.price * item.quantity) }}</td>
           <td>
-            <form method="post" action="{{ url_for('remove_from_cart', pid=item.product.id) }}">
+            <form method="post" action="{{ url_for('remove_from_cart', product_id=item.product.id) }}">
               <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
             </form>
           </td>
