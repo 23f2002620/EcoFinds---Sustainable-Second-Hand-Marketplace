@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, redirect, url_for, request, flash, session, abort
+from flask import Flask, render_template, redirect, url_for, request, flash, session, abort, current_app
+from werkzeug.utils import secure_filename
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 from flask_bcrypt import Bcrypt
@@ -11,6 +12,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'supersecret'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecofinds.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB max
+app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png', '.gif', '.jpeg']
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
@@ -22,7 +25,7 @@ class User(db.Model, UserMixin):
     display_name = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
-    profile_pic = db.Column(db.String(255), default="https://via.placeholder.com/150")
+    profile_pic = db.Column(db.String(255), default="https://via.placeholder.com/100")
 
     def set_password(self, password):
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -38,6 +41,8 @@ class Purchase(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    product = db.relationship('Product', backref='purchases')
+    user = db.relationship('User', backref='purchases')
 
 
 class Product(db.Model):
@@ -60,7 +65,8 @@ class Product(db.Model):
     image_url = db.Column(db.String(255), default="https://via.placeholder.com/200")
     seller_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     seller = db.relationship('User', backref='products')
-    status = db.Column(db.String(20), default="Available")
+    sold = db.Column(db.Boolean, default=False)
+    
 
 # In your models section
 class CartItem(db.Model):
@@ -69,6 +75,12 @@ class CartItem(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
     quantity = db.Column(db.Integer, default=1)
     product = db.relationship('Product')
+
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # --- Login manager ---
 @login_manager.user_loader
@@ -120,7 +132,7 @@ def login():
         ).first()
         if user and user.check_password(password):
             login_user(user)
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('browse'))
         else:
             flash("Invalid credentials.", "danger")
     return render_template('login.html')
@@ -137,7 +149,7 @@ def logout():
 @login_required
 def dashboard():
     if request.method == 'POST':
-        display_name = request.form['display_name'].strip()
+        display_name = request.form.get('display_name').strip()
         email = request.form['email'].strip().lower()
         # Validation
         if not display_name or not email:
@@ -151,7 +163,9 @@ def dashboard():
             current_user.email = email
             db.session.commit()
             flash("Profile updated.", "success")
+        return redirect(url_for('dashboard'))
     return render_template('dashboard.html')
+
 
 # --- Routes: Product CRUD ---
 @app.route('/my_listings')
@@ -191,28 +205,33 @@ def add_product():
     return render_template('add_product.html', categories=categories)
 
 # Add to cart
+# app.py - Add to Cart route
 @app.route('/add_to_cart/<int:product_id>', methods=['POST'])
 @login_required
 def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
     
+    # Prevent sellers from adding their own items
+    if product.seller_id == current_user.id:
+        flash("You can't add your own items to cart", 'danger')
+        return redirect(url_for('browse'))
+    
     # Check if item already in cart
-    cart_item = CartItem.query.filter_by(
-        user_id=current_user.id, 
+    existing = CartItem.query.filter_by(
+        user_id=current_user.id,
         product_id=product_id
     ).first()
 
-    if cart_item:
-        cart_item.quantity += 1
+    if existing:
+        flash('Item already in cart', 'warning')
     else:
-        cart_item = CartItem(
-            user_id=current_user.id,
-            product_id=product_id
-        )
+        cart_item = CartItem(user_id=current_user.id, product_id=product_id)
         db.session.add(cart_item)
+        flash('Added to cart', 'success')
     
     db.session.commit()
     return redirect(url_for('cart'))
+
 
 # Remove from cart
 @app.route('/remove_from_cart/<int:product_id>', methods=['POST'])
@@ -232,22 +251,27 @@ def remove_from_cart(product_id):
 @app.route('/checkout', methods=['POST'])
 @login_required
 def checkout():
-    # Get current user's cart items
     cart_items = CartItem.query.filter_by(user_id=current_user.id).all()
     
-    # Process checkout (e.g., create order, charge payment, clear cart)
-    # Example:
     for item in cart_items:
+        # Create purchase record
         purchase = Purchase(
             user_id=current_user.id,
             product_id=item.product_id
         )
         db.session.add(purchase)
+        
+        # Mark product as sold
+        product = Product.query.get(item.product_id)
+        product.sold = True
+        
+        # Remove from cart
         db.session.delete(item)
     
     db.session.commit()
     flash('Checkout successful!', 'success')
     return redirect(url_for('my_purchases'))
+
 
 
 @app.route('/edit_product/<int:pid>', methods=['GET', 'POST'])
@@ -316,12 +340,11 @@ def my_purchases():
 def browse():
     q = request.args.get('q', '').strip()
     cat = request.args.get('category', '')
-    products = Product.query.filter_by(status="Available")
+    products = Product.query.filter_by(sold=False).all()
     if q:
         products = products.filter(Product.title.ilike(f'%{q}%'))
     if cat:
         products = products.filter_by(category=cat)
-    products = products.all()
     categories = ["Books", "Electronics", "Clothing", "Furniture", "Other"]
     return render_template('browse.html', products=products, categories=categories, q=q, cat=cat)
 
