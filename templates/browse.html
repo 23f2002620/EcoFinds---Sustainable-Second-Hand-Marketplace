@@ -20,16 +20,17 @@
 {% if products %}
 <div class="carousel mb-4">
   {% for p in products %}
-  <div class="carousel-card">
-    <img src="{{ p.image_url }}" alt="{{ p.title }}">
-    <div class="fw-bold mt-2">{{ p.title }}</div>
-    <div class="text-muted">{{ p.category }}</div>
-    <div class="mb-2">${{ p.price }}</div>
-    <a href="{{ url_for('product_detail', pid=p.id) }}" class="btn btn-sm btn-outline-primary w-100 mb-2">View</a>
-    <form method="post" action="{{ url_for('add_to_cart', product_id=p.id) }}">
-      <button type="submit" class="btn btn-sm btn-main w-100">Add to Cart</button>
-    </form>
-  </div>
+    {% if not p.sold %}
+    <div class="carousel-card">
+      <img src="{{ p.image_url }}" alt="{{ p.title }}">
+      <div class="fw-bold mt-2">{{ p.title }}</div>
+      <div class="text-muted">{{ p.category }}</div>
+      <div class="mb-2">${{ p.price }}</div>
+      <form method="post" action="{{ url_for('add_to_cart', product_id=p.id) }}">
+        <button type="submit" class="btn btn-main w-100">Add to Cart</button>
+      </form>
+    </div>
+    {% endif %}
   {% endfor %}
 </div>
 {% else %}
