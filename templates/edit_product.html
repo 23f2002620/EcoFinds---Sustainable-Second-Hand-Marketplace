@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="section-title mb-4">{{ 'Edit' if product else 'Add' }} Product</div>
+<div class="glass-card p-4">
+  <form method="post">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Title</label>
+        <input class="form-control" name="title" value="{{ product.title if product else '' }}" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Category</label>
+        <select class="form-select" name="category" required>
+          {% for c in categories %}
+            <option value="{{ c }}" {% if product and product.category==c %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-12">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" name="description" required>{{ product.description if product else '' }}</textarea>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Price</label>
+        <input class="form-control" name="price" type="number" step="0.01" value="{{ product.price if product else '' }}" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Condition</label>
+        <input class="form-control" name="condition" value="{{ product.condition if product else '' }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Brand</label>
+        <input class="form-control" name="brand" value="{{ product.brand if product else '' }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Model</label>
+        <input class="form-control" name="model" value="{{ product.model if product else '' }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Year</label>
+        <input class="form-control" name="year" value="{{ product.year if product else '' }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Image URL</label>
+        <input class="form-control" name="image_url" value="{{ product.image_url if product else '' }}">
+      </div>
+      <div class="col-md-6">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="original_packaging" value="1" id="original_packaging"
+                 {% if product and product.original_packaging %}checked{% endif %}>
+          <label class="form-check-label" for="original_packaging">Original Packaging</label>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="manual_included" value="1" id="manual_included"
+                 {% if product and product.manual_included %}checked{% endif %}>
+          <label class="form-check-label" for="manual_included">Manual Included</label>
+        </div>
+      </div>
+      <div class="col-md-12">
+        <label class="form-label">Working Condition Description</label>
+        <textarea class="form-control" name="working_desc">{{ product.working_desc if product else '' }}</textarea>
+      </div>
+      <div class="col-md-12">
+        <button type="submit" class="btn btn-main mt-3">{{ 'Update' if product else 'Add' }} Product</button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

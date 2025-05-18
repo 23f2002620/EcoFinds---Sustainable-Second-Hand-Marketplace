@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="section-title">Shopping Cart</div>
+<div class="glass-card p-4">
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Total</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in cart_items %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center">
+              <img src="{{ item.product.image_url }}" class="cart-img me-3" alt="{{ item.product.title }}">
+              {{ item.product.title }}
+            </div>
+          </td>
+          <td>${{ item.product.price }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>${{ '%.2f' % (item.product.price * item.quantity) }}</td>
+          <td>
+            <form method="post" action="{{ url_for('remove_from_cart', pid=item.product.id) }}">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="text-end mt-4">
+    <h4>Total: ${{ total }}</h4>
+    <form method="post" action="{{ url_for('checkout') }}">
+      <button type="submit" class="btn btn-main">Checkout</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

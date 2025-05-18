@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="section-title">My Purchases</div>
+<div class="glass-card p-4">
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Image</th><th>Title</th><th>Category</th><th>Price</th><th>Seller</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in purchases %}
+        <tr>
+          <td><img src="{{ p.product.image_url }}" class="cart-img"></td>
+          <td>{{ p.product.title }}</td>
+          <td>{{ p.product.category }}</td>
+          <td>${{ p.product.price }}</td>
+          <td>{{ p.product.seller.display_name }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -2,38 +2,150 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>EcoFinds</title>
+    <title>{% block title %}EcoFinds{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- SF Pro Display font (Apple TV+ look) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600;900&display=swap">
+    <style>
+        :root {
+            --tv-bg: #f7f8fa;
+            --tv-glass: rgba(255,255,255,0.85);
+            --tv-glass-blur: blur(14px);
+            --tv-accent: #0071e3;
+            --tv-muted: #6b7280;
+            --tv-card-radius: 26px;
+            --tv-shadow: 0 8px 40px 0 rgba(0,0,0,0.08);
+            --tv-card-shadow: 0 4px 18px 0 rgba(0,0,0,0.06);
+        }
+        html, body {
+            background: var(--tv-bg);
+            color: #222;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            min-height: 100vh;
+            letter-spacing: 0.01em;
+        }
+        .navbar {
+            background: var(--tv-glass) !important;
+            border: none;
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,0.04);
+            padding-top: 0.8rem;
+            padding-bottom: 0.8rem;
+            backdrop-filter: var(--tv-glass-blur);
+        }
+        .navbar-brand {
+            font-weight: 900;
+            font-size: 2.2rem;
+            letter-spacing: -1px;
+            color: #222 !important;
+            text-shadow: 0 8px 32px #fff4;
+        }
+        .nav-link {
+            color: var(--tv-muted) !important;
+            font-size: 1.2rem;
+            margin-left: 12px;
+            margin-right: 12px;
+            font-weight: 600;
+            transition: color 0.18s cubic-bezier(.4,0,.2,1);
+        }
+        .nav-link.active, .nav-link:focus, .nav-link:hover {
+            color: var(--tv-accent) !important;
+        }
+        .glass-card {
+            background: var(--tv-glass);
+            backdrop-filter: var(--tv-glass-blur);
+            border-radius: var(--tv-card-radius);
+            box-shadow: var(--tv-card-shadow);
+            padding: 2rem 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .section-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: -1.5px;
+            margin-bottom: 1.5rem;
+            color: #222;
+            text-shadow: 0 8px 32px #fff4;
+        }
+        .btn-main {
+            background: var(--tv-accent);
+            color: #fff;
+            border-radius: 22px;
+            font-weight: 700;
+        }
+        .btn-main:hover {
+            background: #0056b3;
+            color: #fff;
+        }
+        .carousel {
+            overflow-x: auto;
+            display: flex;
+            gap: 20px;
+            padding-bottom: 1rem;
+            scroll-snap-type: x mandatory;
+        }
+        .carousel-card {
+            background: var(--tv-glass);
+            border-radius: var(--tv-card-radius);
+            box-shadow: var(--tv-card-shadow);
+            min-width: 220px;
+            max-width: 220px;
+            padding: 1rem;
+            margin-right: 1rem;
+            scroll-snap-align: start;
+        }
+        .carousel-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 16px;
+        }
+        .profile-pic {
+            width: 100px; height: 100px; border-radius: 50%; object-fit: cover;
+            background: #e5e7eb; border: 2.5px solid #eee;
+        }
+        .cart-img {
+            width: 60px; height: 60px; object-fit: cover; border-radius: 10px;
+        }
+        .table th, .table td { vertical-align: middle; }
+        .alert { border-radius: 12px; }
+    </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand" href="{{ url_for('browse') }}">EcoFinds</a>
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav ms-auto">
-        {% if current_user.is_authenticated %}
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('my_listings') }}">My Listings</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('my_purchases') }}">My Purchases</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
-        {% else %}
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('signup') }}">Sign Up</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
-        {% endif %}
-      </ul>
+<nav class="navbar navbar-expand-lg mb-2">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('browse') }}">EcoFinds</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                {% if current_user.is_authenticated %}
+                  <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Profile</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{{ url_for('my_listings') }}">My Listings</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{{ url_for('my_purchases') }}">Purchases</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{{ url_for('cart') }}">Cart</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+                {% else %}
+                  <li class="nav-item"><a class="nav-link" href="{{ url_for('signup') }}">Sign Up</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
-  </div>
 </nav>
-<div class="container mt-4">
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-  {% block content %}{% endblock %}
+<div class="container py-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} shadow-sm">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <div class="glass-card">
+        {% block content %}{% endblock %}
+    </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

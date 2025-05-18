@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="section-title">Discover Sustainable Finds</div>
+<form class="row mb-4" method="get">
+  <div class="col-md-4">
+    <input class="form-control" name="q" placeholder="Search..." value="{{ q }}">
+  </div>
+  <div class="col-md-4">
+    <select class="form-select" name="category">
+      <option value="">All Categories</option>
+      {% for c in categories %}
+        <option value="{{ c }}" {% if c==cat %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-4">
+    <button class="btn btn-main w-100" type="submit">Filter</button>
+  </div>
+</form>
+{% if products %}
+<div class="carousel mb-4">
+  {% for p in products %}
+  <div class="carousel-card">
+    <img src="{{ p.image_url }}" alt="{{ p.title }}">
+    <div class="fw-bold mt-2">{{ p.title }}</div>
+    <div class="text-muted">{{ p.category }}</div>
+    <div class="mb-2">${{ p.price }}</div>
+    <a href="{{ url_for('product_detail', pid=p.id) }}" class="btn btn-sm btn-outline-primary w-100 mb-2">View</a>
+    <form method="post" action="{{ url_for('add_to_cart', pid=p.id) }}">
+      <button type="submit" class="btn btn-sm btn-main w-100">Add to Cart</button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p>No products found.</p>
+{% endif %}
+{% endblock %}

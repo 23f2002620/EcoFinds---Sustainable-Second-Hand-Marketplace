@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="section-title">My Listings</div>
+  <a href="{{ url_for('add_product') }}" class="btn btn-main">+ Add New</a>
+</div>
+<div class="glass-card p-4">
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Image</th><th>Title</th><th>Category</th><th>Price</th><th>Status</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+        <tr>
+          <td><img src="{{ p.image_url }}" class="cart-img"></td>
+          <td>{{ p.title }}</td>
+          <td>{{ p.category }}</td>
+          <td>${{ p.price }}</td>
+          <td>{{ p.status }}</td>
+          <td>
+            <a href="{{ url_for('edit_product', pid=p.id) }}" class="btn btn-outline-primary btn-sm">Edit</a>
+            <a href="{{ url_for('delete_product', pid=p.id) }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete?')">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

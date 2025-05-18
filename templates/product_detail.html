@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row g-5">
+  <div class="col-md-6">
+    <div class="glass-card p-4">
+      <img src="{{ product.image_url }}" class="img-fluid rounded-4 mb-3" alt="Product Image">
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="glass-card p-4">
+      <h2 class="mb-3">{{ product.title }}</h2>
+      <div class="mb-2"><b>Category:</b> {{ product.category }}</div>
+      <div class="mb-2"><b>Price:</b> ${{ product.price }}</div>
+      <div class="mb-2"><b>Description:</b> {{ product.description }}</div>
+      <div class="mb-2"><b>Condition:</b> {{ product.condition }}</div>
+      <div class="mb-2"><b>Year:</b> {{ product.year }}</div>
+      <div class="mb-2"><b>Brand:</b> {{ product.brand }}</div>
+      <div class="mb-2"><b>Model:</b> {{ product.model }}</div>
+      <div class="mb-2"><b>Seller:</b> {{ product.seller.display_name }}</div>
+      <form method="post" action="{{ url_for('add_to_cart', pid=product.id) }}">
+        <button type="submit" class="btn btn-main mt-3">Add to Cart</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
